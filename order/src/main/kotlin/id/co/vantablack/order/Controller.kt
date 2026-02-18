@@ -10,16 +10,14 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/order")
 class Controller(
-    private val orderRepository: OrderRepository
+    private val orderService: OrderService
 ) {
 
     @PostMapping
     fun submitOrder(
         @RequestBody orderRequest: OrderRequest,
     ): ResponseEntity<OrderResponse> {
-        val orderData = Order.fromRequest(orderRequest)
-
-        val response = orderRepository.save(orderData)
+        val response = orderService.submitOrder(orderRequest)
 
         return ResponseEntity
             .status(HttpStatus.OK)

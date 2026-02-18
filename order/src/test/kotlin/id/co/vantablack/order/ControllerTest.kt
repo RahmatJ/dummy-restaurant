@@ -14,6 +14,7 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.mongodb.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
+import java.math.BigDecimal
 import kotlin.jvm.optionals.getOrNull
 import kotlin.test.assertEquals
 
@@ -40,10 +41,19 @@ class ControllerTest {
 
     @Test
     fun `should return 200`() {
-        val request = random.next<OrderRequest>()
+        val request = OrderRequest(
+            orders = listOf(
+                OrderRequestItem(
+                    menuId = "1",
+                    count = 2,
+                    price = BigDecimal(10_000)
+                )
+            )
+        )
         val expectedResponse = random.next<OrderResponse>().copy(
             orders = request.orders
         )
+        var id = ""
 
         client.post().uri("/order")
             .body(request)
@@ -52,14 +62,14 @@ class ControllerTest {
             .expectBody(OrderResponse::class.java)
             .consumeWith { response ->
                 val body = response.responseBody
+                id = body!!.id
                 assertEquals(expectedResponse.orders, body!!.orders)
             }
 
-        val data = orderRepository.findById(expectedResponse.id).getOrNull()
+        val data = orderRepository.findById(id).getOrNull()
 
-//        TODO(Rahmat): Has error [Conversion to Decimal128 would require inexact rounding of 0] fix this
         assertNotNull(data)
-//        assertEquals(expectedResponse.orders, data.getOrNull()!!.orders)
+        assertEquals(expectedResponse.orders, data.orders)
     }
 
 }
