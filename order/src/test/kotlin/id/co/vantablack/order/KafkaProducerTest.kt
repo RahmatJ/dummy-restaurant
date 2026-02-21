@@ -16,8 +16,12 @@ class KafkaProducerTest {
     fun `should publish message`() {
         val order = random.next<OrderRequest>()
         val topic = random.next<String>()
+        val request = MessageBody(
+            eventType = "Event",
+            data = order
+        )
 
-        kafkaProducer.produce(topic = topic,order)
+        kafkaProducer.produce(topic = topic,request)
 
         verify(exactly = 1) { kafkaTemplate.send(topic, order) }
     }
